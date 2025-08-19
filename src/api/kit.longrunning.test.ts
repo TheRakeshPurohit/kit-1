@@ -1,16 +1,17 @@
+// Set up test environment with temporary directories BEFORE imports
+import tmp from 'tmp-promise'
+import { join } from 'path'
+const tmpDir = tmp.dirSync({ unsafeCleanup: true })
+process.env.KENV = join(tmpDir.name, '.kenv')
+process.env.KIT = join(tmpDir.name, '.kit')
+
+// Now import everything else
 import ava from 'ava'
 import slugify from 'slugify'
 import { getProcessedScripts } from './kit.js'
 import { Script } from '../types/core.js'
 import { kenvPath, kitPath } from '../core/utils.js'
 import { ensureDir, outputFile, remove } from 'fs-extra'
-import { join } from 'path'
-import tmp from 'tmp-promise'
-
-// Set up test environment with temporary directories
-const tmpDir = tmp.dirSync({ unsafeCleanup: true })
-process.env.KENV = join(tmpDir.name, '.kenv')
-process.env.KIT = join(tmpDir.name, '.kit')
 
 // Ensure required directories exist
 await ensureDir(kenvPath())

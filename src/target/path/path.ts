@@ -25,21 +25,21 @@ const toUiPath = (p: string) => isWin ? p.replaceAll('\\', '/') : p
  * @param fileTypes - Array of allowed file extensions (e.g., ['.mp4', '.mp3'])
  * @returns Filtered choices including all directories and matching files
  */
-const filterByFileTypes = (choices: Choice[], fileTypes: string[] | undefined): Choice[] => {
+const filterByFileTypes = (choices: Choice[], fileTypes: string | string[] | undefined): Choice[] => {
   if (!fileTypes) return choices
-  
+
   return choices.filter((choice) => {
     // Always include directories (identified by folder.svg icon)
     if (choice.img?.includes('folder.svg')) {
       return true
     }
-    
+
     // Check file extension
     const ext = ogPath.extname(choice.value)
-    
+
     // Include files with matching extensions
     // Exclude files without extensions (like README, Makefile) when fileTypes is specified
-    return ext && fileTypes.includes(ext)
+    return ext && (Array.isArray(fileTypes) ? fileTypes.includes(ext) : fileTypes === ext)
   })
 }
 
@@ -66,7 +66,7 @@ const getWindowsRoots = async (): Promise<string[]> => {
 
 export const createPathChoices = async (
   startPath: string,
-  { dirFilter = (dirent) => true, dirSort = (a, b) => 0, onlyDirs = false, statFn = statAsync, fileTypes } : {
+  { dirFilter = (dirent) => true, dirSort = (a, b) => 0, onlyDirs = false, statFn = statAsync, fileTypes }: {
     dirFilter?: (dirent: any) => boolean
     dirSort?: (a: any, b: any) => number
     onlyDirs?: boolean
@@ -167,7 +167,7 @@ export const createPathChoices = async (
 
   const mapped = await mapDirents(folders.concat(files))
   const sorted = mapped.sort(dirSort)
-  
+
   // Apply fileTypes filtering if specified
   return filterByFileTypes(sorted, fileTypes)
 }
