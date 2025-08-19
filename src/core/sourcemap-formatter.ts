@@ -57,19 +57,25 @@ export class SourcemapErrorFormatter {
           .replace(this.FILE_URL_REGEX, '')
           .replace(/\?.*$/, '') // Remove query parameters
         
-        // Handle Windows paths
-        if (os.platform() === 'win32' && file.startsWith('/')) {
+        // Store if path is absolute before processing
+        const isAbsolutePath = file.startsWith('/') || file.startsWith('\\') || this.WINDOWS_PATH_REGEX.test(file)
+        
+        // Handle Windows drive letter paths
+        if (os.platform() === 'win32' && file.startsWith('/') && file[2] === ':') {
           // Convert /C:/path to C:/path on Windows
           file = file.substring(1)
         }
         
-        // Ensure absolute paths remain absolute after normalization
-        const isAbsolutePath = file.startsWith('/') || this.WINDOWS_PATH_REGEX.test(file)
+        // Normalize the path
         file = normalize(file)
         
-        // On Unix, normalize may strip leading slash, restore it if needed
-        if (isAbsolutePath && !file.startsWith('/') && os.platform() !== 'win32') {
-          file = '/' + file
+        // Restore leading slash/backslash if it was absolute
+        if (isAbsolutePath) {
+          if (os.platform() === 'win32' && !this.WINDOWS_PATH_REGEX.test(file) && !file.startsWith('\\')) {
+            file = '\\' + file
+          } else if (os.platform() !== 'win32' && !file.startsWith('/')) {
+            file = '/' + file
+          }
         }
         
         frames.push({
@@ -155,20 +161,26 @@ export class SourcemapErrorFormatter {
       // Remove file:// protocol if present
       let cleanPath = filePath.replace(this.FILE_URL_REGEX, '')
       
-      // Handle Windows paths
-      if (os.platform() === 'win32' && cleanPath.startsWith('/')) {
+      // Store if path is absolute before processing
+      const isAbsolutePath = cleanPath.startsWith('/') || cleanPath.startsWith('\\') || this.WINDOWS_PATH_REGEX.test(cleanPath)
+      
+      // Handle Windows drive letter paths
+      if (os.platform() === 'win32' && cleanPath.startsWith('/') && cleanPath[2] === ':') {
         cleanPath = cleanPath.substring(1)
       }
       
       // Resolve relative paths
-      const isAbsolutePath = cleanPath.startsWith('/') || this.WINDOWS_PATH_REGEX.test(cleanPath)
       let resolvedPath = isAbsolute(cleanPath) 
         ? normalize(cleanPath)
         : resolve(basePath || process.cwd(), cleanPath)
       
-      // On Unix, normalize may strip leading slash, restore it if needed  
-      if (isAbsolutePath && !resolvedPath.startsWith('/') && os.platform() !== 'win32') {
-        resolvedPath = '/' + resolvedPath
+      // Restore leading slash/backslash if it was absolute
+      if (isAbsolutePath) {
+        if (os.platform() === 'win32' && !this.WINDOWS_PATH_REGEX.test(resolvedPath) && !resolvedPath.startsWith('\\')) {
+          resolvedPath = '\\' + resolvedPath
+        } else if (os.platform() !== 'win32' && !resolvedPath.startsWith('/')) {
+          resolvedPath = '/' + resolvedPath
+        }
       }
       
       // Check if file exists
