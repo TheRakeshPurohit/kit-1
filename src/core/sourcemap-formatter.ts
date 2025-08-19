@@ -122,9 +122,9 @@ export class SourcemapErrorFormatter {
   private static shouldSkipFrame(frame: StackFrame): boolean {
     const skipPatterns = [
       /node_modules/,
-      /internal\/modules/,
-      /internal\/process/,
-      /internal\/timers/
+      /internal[\/\\]modules/,  // Match both forward and backward slashes
+      /internal[\/\\]process/,  // Match both forward and backward slashes
+      /internal[\/\\]timers/    // Match both forward and backward slashes
     ]
     
     return skipPatterns.some(pattern => pattern.test(frame.file))
