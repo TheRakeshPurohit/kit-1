@@ -24,6 +24,7 @@ await tmp.withDir(async (dir) => {
 
 		await ensureDir(kenvPath())
 		await ensureDir(kitPath())
+		await ensureDir(kitPath("db"))
 
 
 		t.log({
