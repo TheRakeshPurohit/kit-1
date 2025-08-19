@@ -287,7 +287,8 @@ global.send = (channel: Channel, value?: any) => {
 
       process.send(payload)
     } catch (e) {
-      global.warn(e)
+      // Use console.warn directly to avoid infinite recursion with global.warn
+      _consoleWarn(`Failed to send message on channel ${channel}:`, e)
     }
   } else {
     // console.log(from, ...args)
