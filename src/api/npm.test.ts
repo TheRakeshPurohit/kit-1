@@ -14,9 +14,9 @@ import { kenvPath } from "../core/utils.js"
 
 // biome-ignore lint/suspicious/useAwait: <explanation>
 await tmp.withDir(async (dir) => {
-	process.env.KENV = dir.path
-	process.env.KIT_CONTEXT = "workflow"
 	process.env.KENV = path.resolve(dir.path, ".kenv")
+	process.env.KIT = path.resolve(dir.path, ".kit")
+	process.env.KIT_CONTEXT = "workflow"
 
 	ava.beforeEach(async (t) => {
 		global.kitScript = `${randomUUID()}.js`

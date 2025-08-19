@@ -2,9 +2,20 @@ import ava from 'ava'
 import slugify from 'slugify'
 import { getProcessedScripts } from './kit.js'
 import { Script } from '../types/core.js'
-import { kenvPath } from '../core/utils.js'
+import { kenvPath, kitPath } from '../core/utils.js'
 import { ensureDir, outputFile, remove } from 'fs-extra'
 import { join } from 'path'
+import tmp from 'tmp-promise'
+
+// Set up test environment with temporary directories
+const tmpDir = tmp.dirSync({ unsafeCleanup: true })
+process.env.KENV = join(tmpDir.name, '.kenv')
+process.env.KIT = join(tmpDir.name, '.kit')
+
+// Ensure required directories exist
+await ensureDir(kenvPath())
+await ensureDir(kitPath())
+await ensureDir(kitPath('db'))
 
 ava('getProcessedScripts preserves longRunning property', async (t) => {
   const testScriptName = 'Test Longrunning Script'
