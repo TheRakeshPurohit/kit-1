@@ -148,6 +148,8 @@ export async function db<T>(
       _db.data = await getData()
 
       try {
+        // Ensure directory exists before writing (important for Windows)
+        await ensureDir(path.dirname(dbPath))
         // Write initial data to the database
         await _db.write()
       } catch (error) {
